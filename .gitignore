@@ -1,8 +1,7 @@
 logs
 outputs
-dataset/__pycache__
-schemes/__pycache__
 *.tsv
 *.pkl
 *.log
 *.gz
+__pycache__/

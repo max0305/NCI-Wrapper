@@ -32,7 +32,7 @@ class BaseBaseline(ABC):
         self.device = torch.device(args.device if torch.cuda.is_available() else "cpu")
 
         # 建立主要輸出資料夾：outputs/<method>/<timestamp>/
-        ts = time.strftime("%Y%m%d_%H:%M:%S")
+        ts = time.strftime("%Y-%m-%d_%H-%M-%S")
         self.run_dir = Path(args.output_dir) / self.__class__.__name__.lower() / ts
         self.run_dir.mkdir(parents=True, exist_ok=True)
 

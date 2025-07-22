@@ -7,6 +7,7 @@ import numpy as np
 from os import listdir
 from os.path import isfile, join
 import pandas as pd
+from pathlib import Path
 
 
 def set_seed(seed):
@@ -28,22 +29,12 @@ def get_ckpt(args):
         desired_ckpt_epoch = int(given_ckpt.split('=')[1].split('-')[0])
         desired_ckpt_name = ckpt_saved_folder + given_ckpt
     else:
-        for ckpt_name in ckpt_files:
-            if ckpt_name[-4:] != 'ckpt':
-                continue
-            if ckpt_name.split('_epoch')[0] != args.tag_info:
-                continue
+        # 預設抓最新的權重
+        ckpt_files = [f for f in ckpt_files if f.endswith('.ckpt')]
+        ckpt_files.sort(key=lambda f: (Path(ckpt_saved_folder)/f).stat().st_mtime,
+                        reverse=True)
+        desired_ckpt_name = ckpt_files[0]
 
-            try:
-                ckpt_epoch = int(ckpt_name.split('epoch=')[1].split('-')[0])
-            except:
-                continue
-            if certain_epoch is not None:
-                if certain_epoch == ckpt_epoch:
-                    desired_ckpt_epoch, desired_ckpt_name = ckpt_epoch, ckpt_name
-            else:
-                if ckpt_epoch > desired_ckpt_epoch:
-                    desired_ckpt_epoch, desired_ckpt_name = ckpt_epoch, ckpt_name
     print('=' * 20)
     print('Loading: ' + desired_ckpt_name)
     print('=' * 20)

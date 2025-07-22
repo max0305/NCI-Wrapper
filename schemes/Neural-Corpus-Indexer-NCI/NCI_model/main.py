@@ -311,7 +311,7 @@ def parsers_parser():
     parser.add_argument('--learning_rate', type=float, default=2e-4)
     parser.add_argument('--decoder_learning_rate', type=float, default=1e-4)
     parser.add_argument('--certain_epoch', type=int, default=None)
-    parser.add_argument('--given_ckpt', type=str, default='')
+    parser.add_argument('--given_ckpt', type=str, default=None)
     parser.add_argument('--infer_ckpt', type=str, default='')
     parser.add_argument('--model_info', type=str, default='base', choices=['small', 'large', 'base', '3b', '11b'])
     parser.add_argument('--id_class', type=str, default='k10_c10')

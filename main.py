@@ -48,6 +48,8 @@ def parse_args():
                    help="可選的 YAML/JSON 設定檔路徑")
 
     # —— 其他雜項 ——
+    p.add_argument("--n_gpu", type=str, default="1",
+                   help="GPU 數量")
     p.add_argument("--device", type=str, default="cuda",
                    help="訓練 / 推論所使用裝置")
     p.add_argument("--seed", type=int, default=42,
@@ -60,6 +62,10 @@ def parse_args():
                     choices=["small", "base", "large"])
     p.add_argument("--qg_num", type=int, default=15) 
     p.add_argument("--class_num", type=int, default=30) 
+
+    # —— train 參數 ——
+    p.add_argument("--epoch", type=str, default="3")
+    
     return p.parse_args()
 
 
@@ -186,12 +192,12 @@ def main():
         # — train —
         if args.do_train:
             logger.info(f"=== [{name}] train()    ===")
-            baseline.train()
+            baseline.train(args)
 
         # — eval —
         if args.do_eval:
             logger.info(f"=== [{name}] evaluate() ===")
-            metrics = baseline.evaluate(split="test")
+            metrics = baseline.evaluate(args)
             baseline.save_results(metrics, output_dir=args.output_dir)
             logger.info(f"結果：{metrics}")
             summary_rows.append((name, metrics))

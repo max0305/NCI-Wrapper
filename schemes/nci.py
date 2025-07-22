@@ -49,44 +49,37 @@ class NCI(BaseBaseline):
 
     # ----------------------------------------------------------------------
 
-    def train(self):
+    def train(self, args):
         """
         呼叫 NCI 的 train.sh
         確保此函式在子程序 *完成訓練* 前不會返回
         """
+        print(os.path.join(self.repo_dir, "NCI_model", "train.sh"))
         cmd = ["bash", "train.sh",
-               "--data", "$NCI_DATA",          # train.sh 裡要能展開此 env
-               "--output", str(self.work_dir),
-               "--cuda", self.args.device]     # 也可以改用 CUDA_VISIBLE_DEVICES
+               args.model_info,
+               args.n_gpu,
+               args.epoch,
+        ]       
 
-        self._run_subprocess(cmd, "訓練")
+        self._run_subprocess(cmd, os.path.join(self.repo_dir, "NCI_model"), "訓練")
 
     # ----------------------------------------------------------------------
 
-    def evaluate(self, split):
+    def evaluate(self, args):
         """
         1) 找到最佳 checkpoint
         2) 呼叫 infer.sh
         3) 解析輸出，回傳指標 dict
         """
-        ckpt = self.work_dir / "checkpoints" / "best.ckpt"
-        if not ckpt.exists():
-            raise FileNotFoundError(f"找不到最佳模型權重：{ckpt}")
-
-        infer_dir = self.work_dir / "infer"
-        infer_dir.mkdir(exist_ok=True)
 
         cmd = ["bash", "infer.sh",
-               "--data", "$NCI_DATA",
-               "--ckpt", str(ckpt),
-               "--output", str(infer_dir),
-               "--split", split]
+               args.model_info,
+        ]
 
-        stdout = self._run_subprocess(cmd, "推論")
+        stdout = self._run_subprocess(cmd, os.path.join(self.repo_dir, "NCI_model"), "推論")
 
         # TODO: 依 NCI 實際輸出格式萃取 MRR / Recall@K
-        metrics = self._parse_metrics(stdout, infer_dir)
-        return metrics
+        return {"nike": 1}
 
     # ----------------------------------------------------------------------
 
@@ -108,14 +101,14 @@ class NCI(BaseBaseline):
 
     # ---------- 私用輔助 ---------------------------------------------------
 
-    def _run_subprocess(self, cmd_list, stage: str) -> str:
+    def _run_subprocess(self, cmd_list, cwd, stage: str) -> str:
         """
         執行 bash 指令；回傳 stdout 字串。 任何非零退出碼立即 raise。
         """
-        self.logger.info(f"NCI {stage} 指令：{' '.join(cmd_list)}")
+        self.logger.info(f"NCI {stage} 指令：{' '.join(str(x) for x in cmd_list)}")
         res = subprocess.run(
             cmd_list,
-            cwd=self.repo_dir,
+            cwd=cwd,
             env=self.env,
             text=True,
             capture_output=True

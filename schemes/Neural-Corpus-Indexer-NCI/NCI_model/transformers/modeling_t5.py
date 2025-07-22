@@ -705,11 +705,7 @@ class T5Stack(T5PreTrainedModel):
             raise ValueError(f"You have to specify either {err_msg_prefix}inputs or {err_msg_prefix}inputs_embeds")
 
         if inputs_embeds is None:
-            assert self.embed_tokens is not None, "You have to intialize the model with valid token embeddings"
-            if self.training and self.is_decoder and len(input_ids)==2:
-                inputs_embeds = self.embed_tokens(input_ids[0])
-            else:
-                inputs_embeds = self.embed_tokens(input_ids)
+            inputs_embeds = self.embed_tokens(input_ids)
 
         batch_size, seq_length = input_shape
 
