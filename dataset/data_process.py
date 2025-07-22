@@ -22,7 +22,7 @@ def data_process(model_info, qg_num, class_num):
 
     import textwrap, sys
 
-    base_dir = "./Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset/"
+    base_dir = "./schemes/Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset/"
 
 ###################################################################################################
 
@@ -328,11 +328,10 @@ def data_process(model_info, qg_num, class_num):
 
 ###################################################################################################
 
-    workdir = Path("./Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset/bert").resolve()
     try:
         subprocess.run(
-            ["bash", "bert_NQ.sh", "1"],
-            cwd=workdir,
+            ["bash", "bert/bert_NQ.sh", "1"],
+            cwd=base_dir,
             capture_output=True,
             text=True,
             check=True
@@ -378,11 +377,10 @@ def data_process(model_info, qg_num, class_num):
 
 ###################################################################################################
 
-    workdir = Path("./Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset/kmeans").resolve()
     try:
         subprocess.run(
-            ["bash", "kmeans_NQ.sh", f"{class_num}", f"{model_info}"],
-            cwd=workdir,
+            ["bash", "kmeans/kmeans_NQ.sh", f"{class_num}", f"{model_info}"],
+            cwd=base_dir,
             capture_output=True,
             text=True,
             check=True
@@ -419,11 +417,10 @@ def data_process(model_info, qg_num, class_num):
 
 ###################################################################################################
 
-    workdir = Path("./Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset/qg").resolve()
     try:
         subprocess.run(
-            ["bash", "NQ_qg.sh", "1", f"{qg_num}", f"{model_info}"],
-            cwd=workdir,
+            ["bash", "qg/NQ_qg.sh", "1", f"{qg_num}", f"{model_info}"],
+            cwd=base_dir,
             capture_output=True,
             text=True,
             check=True

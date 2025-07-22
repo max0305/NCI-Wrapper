@@ -1,3 +1,4 @@
+# python -u qg.py --idx 0 --cuda_device 0 --partition_num 1 --return_num 15 --max_len 64 --dataset NQ
 import pandas as pd
 import pickle
 import torch
@@ -44,7 +45,7 @@ def main(args):
 
     device=torch.device(f"cuda:{args.cuda_device}")
     ##  You can also download from Hugging Face. This folder should be in the same path as the notebook.
-    model = AutoModelForSeq2SeqLM.from_pretrained("doc2query-t5-base-msmarco").to(f"cuda:{args.cuda_device}")
+    model = AutoModelForSeq2SeqLM.from_pretrained(f"doc2query-t5-{args.model_info}-msmarco").to(f"cuda:{args.cuda_device}")
 
 
     # if torch.cuda.device_count() > 1:
@@ -53,7 +54,7 @@ def main(args):
     #     model=torch.nn.DataParallel(model, device_ids=[0,1]).cuda()
         
     model.eval()
-    tokenizer = AutoTokenizer.from_pretrained("doc2query-t5-base-msmarco")
+    tokenizer = AutoTokenizer.from_pretrained(f"doc2query-t5-{args.model_info}-msmarco")
 
 
     id_doc_dict = {}
@@ -79,6 +80,7 @@ def main(args):
     text_partitation = []
     text_partitation_id = []
 
+    '''
     text_partitation.append(text_list_all[:base])
     text_partitation_id.append(text_id_all[:base])
     
@@ -88,6 +90,13 @@ def main(args):
 
     text_partitation.append(text_list_all[(i+2)*base:  ])
     text_partitation_id.append(text_id_all[(i+2)*base:  ])
+    '''
+    for j in range(args.partition_num):
+        start = j * base
+        # 最後一份必須到尾巴，才能 cover 不可整除的餘數
+        end = (j + 1) * base if j < args.partition_num - 1 else len(text_list_all)
+        text_partitation.append(text_list_all[start:end])
+        text_partitation_id.append(text_id_all[start:end])
 
     output_qg = []
     output_docid = []
@@ -138,6 +147,7 @@ if __name__ == '__main__':
     parser.add_argument("--max_len", type=int, default=64, help="max length")
     parser.add_argument("--return_num", type=int, default=20, help="return num")
     parser.add_argument("--cuda_device", type=int, default=0, help="cuda")
+    parser.add_argument("--model_info", type=str, default="base")
 
     args = parser.parse_args()
     print(args)

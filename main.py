@@ -124,7 +124,7 @@ def run_preprocess(dataset_path: str, logger: logging.Logger, model_info: str, q
         logger.error("找不到 dataset 模組，請確認路徑")
         raise e
 
-    output_dir = "./Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset"
+    output_dir = "./schemes/Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset"
 
     logger.info("開始轉換為 nq 格式 …")
     convert_to_nq_splits(dataset_path, output_dir, 0.2, 42)
@@ -180,12 +180,12 @@ def main():
     summary_rows = []
     for baseline in baselines:
         name = baseline.__class__.__name__
-        logger.info(f"=== [{name}] setup() ===")
+        logger.info(f"=== [{name}] setup()    ===")
         baseline.setup()
 
         # — train —
         if args.do_train:
-            logger.info(f"=== [{name}] train() ===")
+            logger.info(f"=== [{name}] train()    ===")
             baseline.train()
 
         # — eval —
