@@ -1,6 +1,7 @@
 import os
 import argparse
 import pickle
+import re
 
 import nltk
 import pandas as pd
@@ -403,9 +404,32 @@ if __name__ == "__main__":
     print(dir_path)
     print(parent_path)
     args.logs_dir = dir_path + '/logs/'
+
+    # 掃描 logs/ 內所有只含數字的資料夾名稱
+    # re.fullmatch 用來確保名稱全是數字
+    idx_list = []
+    for name in os.listdir(args.logs_dir):
+        full_path = os.path.join(args.logs_dir, name)
+        if os.path.isdir(full_path) and re.fullmatch(r'\d+', name):
+            idx_list.append(int(name))
     
+    # 推算下一個編號
+    next_idx = (max(idx_list) + 1) if idx_list else 1   # 若沒有任何資料夾就從 1 開始
+
+    if args.mode == 'train':
+        # 建立 logs/<next_idx>/ 資料夾
+        run_dir = os.path.join(args.logs_dir, str(next_idx))
+        os.makedirs(run_dir, exist_ok=False)   # 建立失敗就讓程式拋錯，避免覆蓋
+
+    elif args.mode == 'eval':
+        run_dir = os.path.join(args.logs_dir, str(next_idx - 1)) + '/'
+
+    # 更新
+    args.logs_dir = run_dir
+    print(args.logs_dir)
+
     # this is model pkl save dir
-    args.output_dir = dir_path + '/logs/'
+    args.output_dir = run_dir
 
     time_str = time.strftime("%Y%m%d-%H%M%S")
     # Note -- you can put important info into here, then it will appear to the name of saved ckpt
@@ -432,6 +456,7 @@ if __name__ == "__main__":
     elif args.mode == 'eval':
         args.recall_num = [1,5,10,20,50,100]
         inference(args)
+        recall_value, mrr_value = calculate(args)
     elif args.mode == 'calculate':
         args.res1_save_path = '' # your result path
         # args.recall_num = [1,5,10,20,50,100]
