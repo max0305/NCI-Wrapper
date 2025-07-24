@@ -119,8 +119,7 @@ def import_baseline_class(module_path: str, class_name: str):
 # --------------------------------------------------
 BASELINE_REGISTRY = {
     "nci":  ("schemes.nci",  "NCI"),        # 例：schemes/nci.py → class NCI
-    #"bert": ("schemes.bert", "BERTBaseline"),
-    # 之後再新增其他 baseline 時，只要在此註冊即可
+    "sparse": ("schemes.sparse", "SparseRetrieval"),
 }
 
 
