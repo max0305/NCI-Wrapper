@@ -37,7 +37,7 @@ class BaseBaseline(ABC):
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
         # Logger：console + file
-        self.logger = self._init_logger(self.run_dir / "run.log", args.log_level)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         # 固定隨機種子
         self._set_seed(self.seed)

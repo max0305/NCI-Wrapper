@@ -22,17 +22,13 @@ dummy_annotation = {
     "yes_no_answer": "NONE"
 }
 
-def convert_to_nq_splits(input_path, output_dir, dev_ratio, seed):
+def convert_to_nq_splits(input_train_path, input_dev_path, output_dir="./", seed=42):
     # 讀入所有 items
-    with open(input_path, 'r', encoding='utf-8') as rf:
-        items = json.load(rf)
+    with open(input_train_path, 'r', encoding='utf-8') as rf:
+        train_items = json.load(rf)
 
-    # 隨機打散並切分
-    random.seed(seed)
-    random.shuffle(items)
-    split_idx  = int(len(items) * dev_ratio)
-    dev_items   = items[:split_idx]
-    train_items = items[split_idx:]
+    with open(input_dev_path, 'r', encoding='utf-8') as rf:
+        dev_items = json.load(rf)
 
     # 輸出檔名
     splits = {

@@ -20,7 +20,6 @@ from typing import List
 import numpy as np
 import torch
 
-from dataset.baseline import convert_to_nq_splits
 # --------------------------------------------------
 # 1. 解析命令列參數
 # --------------------------------------------------
@@ -28,6 +27,8 @@ def parse_args():
     """定義並解析 command-line 參數 (args)"""
     p = argparse.ArgumentParser(description="Unified Baseline Runner")
     # —— Pipeline flag ——
+    p.add_argument("--split_raw", action="store_true",
+                   help="原始資料分割")
     p.add_argument("--do_preprocess", action="store_true",
                    help="執行資料前處理")
     p.add_argument("--do_train", action="store_true",
@@ -78,15 +79,23 @@ def init_logger(level="INFO", log_dir: str = "./logs") -> logging.Logger:
     time_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = Path(log_dir) / f"run_{time_str}.log"
 
+    # 讓 root logger 只有一條 FileHandler
     logging.basicConfig(
         level=getattr(logging, level.upper()),
         format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler(log_path, encoding="utf-8"),
-        ],
+        handlers=[logging.FileHandler(log_path, encoding="utf-8")]
     )
-    return logging.getLogger(__name__)
+    
+    # 取得子 logger，額外加一條 Console handler
+    logger = logging.getLogger(__name__)
+    if not logger.handlers:                      # 防止重複 addHandler
+        console = logging.StreamHandler()
+        console.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+        logger.addHandler(console)
+
+    #logger.propagate = False                     # 阻斷往 root
+
+    return logger
 
 
 def set_seed(seed: int = 42):
@@ -118,25 +127,30 @@ BASELINE_REGISTRY = {
 # --------------------------------------------------
 # 4. 資料前處理流程
 # --------------------------------------------------
-def run_preprocess(dataset_path: str, logger: logging.Logger, model_info: str, qg_num: int, class_num: int):
+#def run_preprocess(dataset_path: str, logger: logging.Logger, model_info: str, qg_num: int, class_num: int):
+def run_preprocess(dataset_path: str, logger: logging.Logger, seed: int):
     """
     呼叫 dataset.prepare_dataset.prepare_all
     - raw/ → processed/ + splits/
     """
     try:
-        from dataset.baseline import convert_to_nq_splits
-        from dataset.data_process import data_process
+        #from dataset.baseline import convert_to_nq_splits
+        #from dataset.data_process import data_process
+        from dataset.split import split_and_save
     except ModuleNotFoundError as e:
         logger.error("找不到 dataset 模組，請確認路徑")
         raise e
 
-    output_dir = "./schemes/Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset"
+    # output_dir = "./schemes/Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset"
+    split_and_save(input_path=dataset_path ,seed=seed)
 
+    '''
     logger.info("開始轉換為 nq 格式 …")
     convert_to_nq_splits(dataset_path, output_dir, 0.2, 42)
     logger.info("開始資料前處理 …")
     data_process(model_info, qg_num, class_num)
     logger.info("資料處理完成！")
+    '''
 
 
 # --------------------------------------------------
@@ -173,8 +187,9 @@ def main():
     set_seed(args.seed)
 
     # ——— 6.1 資料前處理 ———
-    if args.do_preprocess:
-        run_preprocess(args.dataset_path, logger, args.model_info, args.qg_num, args.class_num)
+    if args.split_raw:
+        #run_preprocess(args.dataset_path, logger, args.model_info, args.qg_num, args.class_num)
+        run_preprocess(args.dataset_path, logger, args.seed)
 
     
     # ——— 6.2 構建 baseline instance 列表 ———
@@ -187,7 +202,7 @@ def main():
     for baseline in baselines:
         name = baseline.__class__.__name__
         logger.info(f"=== [{name}] setup()    ===")
-        baseline.setup()
+        baseline.setup(args)
 
         # — train —
         if args.do_train:
@@ -199,7 +214,7 @@ def main():
             logger.info(f"=== [{name}] evaluate() ===")
             metrics = baseline.evaluate(args)
             baseline.save_results(metrics, output_dir=args.output_dir)
-            logger.info(f"結果：{metrics}")
+            logger.info(f"{name} 結果：{metrics}")
             summary_rows.append((name, metrics))
 
     # ——— 6.4 彙總結果 ———

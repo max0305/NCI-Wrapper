@@ -2,6 +2,7 @@ import os
 import argparse
 import pickle
 import re
+import json
 
 import nltk
 import pandas as pd
@@ -348,6 +349,8 @@ def parsers_parser():
     parser.add_argument('--kary', type=int, default=0)
     parser.add_argument('--tree', type=int, default=1)
 
+    parser.add_argument('--nci_final', type=str, default=None)
+
     parser_args = parser.parse_args()
 
     # args post process
@@ -455,8 +458,17 @@ if __name__ == "__main__":
         train(args)
     elif args.mode == 'eval':
         args.recall_num = [1,5,10,20,50,100]
-        inference(args)
-        recall_value, mrr_value = calculate(args)
+        recall_value, mrr_value = inference(args)
+
+        metrics = {
+            "Recall": recall_value,
+            "MRR": mrr_value
+        }
+
+        with open(os.path.join(args.nci_final, "result.json"), "w", encoding="utf-8") as f:
+            json.dump(metrics, f, ensure_ascii=False, indent=2)
+            
+
     elif args.mode == 'calculate':
         args.res1_save_path = '' # your result path
         # args.recall_num = [1,5,10,20,50,100]

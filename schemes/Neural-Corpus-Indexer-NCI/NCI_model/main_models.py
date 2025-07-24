@@ -456,7 +456,7 @@ class T5FineTuner(pl.LightningModule):
             eval_batch_size=args.eval_batch_size,
             max_output_length=args.max_output_length,
         )
-        print(t5_config)
+        # print(t5_config)
         model = T5ForConditionalGeneration(t5_config)
         if args.pretrain_encoder:
             pretrain_model = T5ForConditionalGeneration.from_pretrained(args.model_name_or_path)
@@ -466,7 +466,7 @@ class T5FineTuner(pl.LightningModule):
                     with torch.no_grad():
                         param.copy_(pretrain_params[name])
         self.model = model
-        print(self.model)
+        # print(self.model)
         self.tokenizer = T5Tokenizer.from_pretrained(args.tokenizer_name_or_path)
         # self.rouge_metric = load_metric('rouge')
 

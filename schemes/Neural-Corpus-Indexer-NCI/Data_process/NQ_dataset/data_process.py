@@ -1,4 +1,4 @@
-def data_process(model_info, qg_num, class_num):
+def data_process(model_info, qg_num, class_num, output_dir):
     import pandas as pd
     import pickle
     import torch
@@ -22,7 +22,7 @@ def data_process(model_info, qg_num, class_num):
 
     import textwrap, sys
 
-    base_dir = "./schemes/Neural-Corpus-Indexer-NCI/Data_process/NQ_dataset/"
+    base_dir = output_dir
 
 ###################################################################################################
 
