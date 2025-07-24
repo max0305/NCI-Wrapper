@@ -94,7 +94,7 @@ class NCI(BaseBaseline):
 
         self._run_subprocess(cmd, os.path.join(self.repo_dir, "NCI_model"), "推論")
 
-        metrics = self._parse_metrics(result_path=self.run_dir / "result.json")
+        metrics = self._parse_metrics(result_path=self.run_dir / "metrics.json")
 
 
 

@@ -465,7 +465,7 @@ if __name__ == "__main__":
             "MRR": mrr_value
         }
 
-        with open(os.path.join(args.nci_final, "result.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(args.nci_final, "metrics.json"), "w", encoding="utf-8") as f:
             json.dump(metrics, f, ensure_ascii=False, indent=2)
             
 
