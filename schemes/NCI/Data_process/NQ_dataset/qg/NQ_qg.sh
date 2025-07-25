@@ -1,7 +1,7 @@
 # +
 cd qg
 
-model_info=$3
+model_info=base
 
 conda install -c conda-forge git-lfs -y
 git lfs install

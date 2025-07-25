@@ -113,7 +113,7 @@ def data_process(model_info, qg_num, class_num, output_dir):
                 content = re.sub('<[^<]+?>', '', content).replace('\n', '').strip()
                 content = re.sub(' +', ' ', content)
                 arr.append(content)
-            doc_tac = item['document_title'] + abs + content
+            doc_tac = item['document_title'] + ": " + abs + ". " + content
             arr.append(doc_tac)
             language = 'en'
             arr.append(language)
@@ -127,6 +127,10 @@ def data_process(model_info, qg_num, class_num, output_dir):
     in_path  = os.path.join(base_dir, "v1.0-simplified_simplified-nq-train.jsonl.gz")
     out_path = os.path.join(base_dir, "nq_train.tsv")
     batch_size = 20000
+
+    if os.path.exists(out_path):
+        # 用 'w' 打開再關閉，就會把檔案內容全部清空
+        open(out_path, 'w', encoding='utf-8').close()
 
     buffer = []
     with gzip.open(in_path, "r+") as f:
@@ -217,7 +221,7 @@ def data_process(model_info, qg_num, class_num, output_dir):
                 content = re.sub(' +', ' ', content)
                 arr.append(content)
 
-            doc_tac = title + abs + content
+            doc_tac = title + ": " + abs + ". " + content
             arr.append(doc_tac)
 
             language = 'en'
@@ -328,23 +332,13 @@ def data_process(model_info, qg_num, class_num, output_dir):
 
 ###################################################################################################
 
-    try:
-        subprocess.run(
-            ["bash", "bert/bert_NQ.sh", "1"],
-            cwd=base_dir,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-    except subprocess.CalledProcessError as e:
-        print("子行程失敗，exit code =", e.returncode, file=sys.stderr)
-        print(textwrap.dedent(f"""
-            ---------- stdout ----------
-            {e.stdout}
-            ---------- stderr ----------
-            {e.stderr}
-        """), file=sys.stderr)
-        raise
+    subprocess.run(
+        ["bash", "bert/bert_NQ.sh", "1"],
+        cwd=base_dir,
+        text=True,
+        check=True
+    )
+
 
 ###################################################################################################
 
@@ -377,23 +371,13 @@ def data_process(model_info, qg_num, class_num, output_dir):
 
 ###################################################################################################
 
-    try:
-        subprocess.run(
-            ["bash", "kmeans/kmeans_NQ.sh", f"{class_num}", f"{model_info}"],
-            cwd=base_dir,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-    except subprocess.CalledProcessError as e:
-        print("子行程失敗，exit code =", e.returncode, file=sys.stderr)
-        print(textwrap.dedent(f"""
-            ---------- stdout ----------
-            {e.stdout}
-            ---------- stderr ----------
-            {e.stderr}
-        """), file=sys.stderr)
-        raise
+    subprocess.run(
+        ["bash", "kmeans/kmeans_NQ.sh", f"{class_num}", f"{model_info}"],
+        cwd=base_dir,
+        text=True,
+        check=True
+    )
+
 
 ###################################################################################################
 
@@ -417,23 +401,12 @@ def data_process(model_info, qg_num, class_num, output_dir):
 
 ###################################################################################################
 
-    try:
-        subprocess.run(
-            ["bash", "qg/NQ_qg.sh", "1", f"{qg_num}", f"{model_info}"],
-            cwd=base_dir,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-    except subprocess.CalledProcessError as e:
-        print("子行程失敗，exit code =", e.returncode, file=sys.stderr)
-        print(textwrap.dedent(f"""
-            ---------- stdout ----------
-            {e.stdout}
-            ---------- stderr ----------
-            {e.stderr}
-        """), file=sys.stderr)
-        raise
+    subprocess.run(
+        ["bash", "qg/NQ_qg.sh", "1", f"{qg_num}", f"{model_info}"],
+        cwd=base_dir,
+        text=True,
+        check=True
+    )
 
 ###################################################################################################
 

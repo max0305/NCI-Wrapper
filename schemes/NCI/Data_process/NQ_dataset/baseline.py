@@ -43,8 +43,21 @@ def convert_to_nq_splits(input_train_path, input_dev_path, output_dir="./", seed
             for item in split_items:
                 iid    = item["iid"]
                 biz_id = item["item_id"]
-                title   = f"res {iid}"
-                abs_txt = "|".join(item.get("features", []))
+                title   = f"Restaurant #{iid}"
+
+                price_val = float(item.get("price", 0.0))
+
+                # 將 feature + importance 組成 "food: 0.40 | cleaness: 0.20" 
+                rating_pairs = [f"price: {price_val:.2f}"] + [
+                    f"{feat}: {rating:.2f}"
+                    for feat, rating in zip(
+                        item.get("features", []),
+                        item.get("importance", [])
+                    )
+                ]
+                # 加上前綴，並以 "|" 分隔
+                abs_txt = "Attributes and ratings — " + " | ".join(rating_pairs)
+
                 content = item.get("text_description", "")
 
                 # 三段：H1 標題 + P 摘要 + 正文
@@ -54,9 +67,14 @@ def convert_to_nq_splits(input_train_path, input_dev_path, output_dir="./", seed
                 tokens = document_text.split()
                 document_tokens = [{"token": t} for t in tokens]
 
+                # query ground truth
+                question_text = (
+                    f"What are the main attributes and price level of {title}?"
+                )
+
                 example = {
                     "example_id":     biz_id,
-                    "question_text":  f"Tell me about {title}",
+                    "question_text":  question_text, 
                     "document_title": title,
                     "document_text":  document_text,
                     "document_tokens": document_tokens,
