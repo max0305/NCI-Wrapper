@@ -84,7 +84,7 @@ class SparseRetrieval(BaseBaseline):
 
         mrr   /= len(q_ids)
         recall =  hits / len(q_ids)
-        return {"MRR": mrr, f"Recall@{recall_k}": recall}
+        return {f"Recall@{recall_k}": recall, "MRR": mrr}
 
     # -------------------------------------------------
     # 4) save_results：metrics + index
