@@ -15,7 +15,7 @@ from main_models import T5FineTuner, l1_query, decode_token
 from main_utils import set_seed, get_ckpt, dec_2d, numerical_decoder
 from torch.utils.data import DataLoader
 from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
-from pytorch_lightning.plugins import DDPPlugin
+from pytorch_lightning.strategies import DDPStrategy as DDPPlugin
 from tqdm import tqdm
 from transformers import T5Tokenizer
 
@@ -76,32 +76,32 @@ def train(args):
             save_on_train_epoch_end=False,
             mode="max",
             save_top_k=1,
-            every_n_val_epochs=args.check_val_every_n_epoch,
         )
         lr_monitor = pl.callbacks.LearningRateMonitor()
         train_params = dict(
             accumulate_grad_batches=args.gradient_accumulation_steps,
-            gpus=args.n_gpu,
+            accelerator='cuda',
+            devices=args.n_gpu,              # 跑幾張 GPU
             max_epochs=args.num_train_epochs,
             precision=16 if args.fp_16 else 32,
-            amp_level=args.opt_level,
-            resume_from_checkpoint=args.resume_from_checkpoint,
+            #amp_level=args.opt_level,
+            #resume_from_checkpoint=args.resume_from_checkpoint,
             gradient_clip_val=args.max_grad_norm,
-            checkpoint_callback=True,
+            #checkpoint_callback=True,
             check_val_every_n_epoch=args.check_val_every_n_epoch,
             val_check_interval=args.val_check_interval,
             limit_val_batches=args.limit_val_batches,
             logger=logger,
             callbacks=[lr_monitor, checkpoint_callback],
-            plugins=DDPPlugin(find_unused_parameters=False),
-            accelerator=args.accelerator,
-            amp_backend='apex',
+            strategy=DDPPlugin(find_unused_parameters=False),
+            #accelerator=args.accelerator,
+            #amp_backend='apex',
         )
     else:
         NotImplementedError("This monitor is not implemented!")
 
     trainer = pl.Trainer(**train_params)
-    trainer.fit(model)
+    trainer.fit(model, ckpt_path=args.resume_from_checkpoint)
 
 
 def inference(args):

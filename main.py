@@ -43,11 +43,12 @@ def parse_args():
     # —— 資料與輸出路徑 ——
     p.add_argument("--dataset_path", type=str, default="./dataset/raw/item_profile_sample.json",
                    help="資料目錄 (raw/ processed/ splits/)")
-    p.add_argument("--output_dir", type=str, default="./outputs",
+    p.add_argument("--output_dir", type=str, default=os.path.join(os.path.dirname(__file__), "outputs"),
                    help="所有 baseline 結果輸出根目錄")
     p.add_argument("--config", type=str, default=None,
                    help="可選的 YAML/JSON 設定檔路徑")
 
+    ###################### NCI ######################
     # —— 其他雜項 ——
     p.add_argument("--n_gpu", type=str, default="1",
                    help="GPU 數量")
@@ -66,6 +67,8 @@ def parse_args():
 
     # —— train 參數 ——
     p.add_argument("--epoch", type=str, default="3")
+
+    ###################### GR, MVDR ######################
     
     return p.parse_args()
 
@@ -120,6 +123,8 @@ def import_baseline_class(module_path: str, class_name: str):
 BASELINE_REGISTRY = {
     "nci":  ("schemes.nci",  "NCI"),        # 例：schemes/nci.py → class NCI
     "sparse": ("schemes.sparse", "SparseRetrieval"),
+    "gr": ("schemes.gr", "GR"),
+    "mvdr": ("schemes.mvdr", "MVDR"),
 }
 
 

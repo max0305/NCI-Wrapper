@@ -15,7 +15,7 @@
 """ PyTorch DeBERTa model. """
 
 import math
-from collections import Sequence
+from collections.abc import Sequence
 
 import torch
 from packaging import version

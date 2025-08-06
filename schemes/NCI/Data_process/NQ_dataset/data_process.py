@@ -243,7 +243,7 @@ def data_process(model_info, qg_num, class_num, output_dir):
 
     ## Mapping tool
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = BertTokenizer.from_pretrained('/home/jun/baseline/schemes/NCI/Data_process/NQ_dataset/bert/bert-base-uncased')
     def lower(x):
         # 用 BERT 分詞器把原始文字拆成 sub‑word tokens
         text = tokenizer.tokenize(x)
@@ -273,7 +273,7 @@ def data_process(model_info, qg_num, class_num, output_dir):
 
     ## Concat train doc and validation doc to obtain full document collection
 
-    nq_all_doc = nq_train.append(nq_dev)
+    nq_all_doc = pd.concat([nq_train, nq_dev])
     nq_all_doc.reset_index(inplace = True)
 
 ###################################################################################################
@@ -503,7 +503,7 @@ def data_process(model_info, qg_num, class_num, output_dir):
 
 ###################################################################################################
 
-    nq_all_doc_non_duplicate = nq_train.append(nq_dev)
+    nq_all_doc_non_duplicate = pd.concat([nq_train, nq_dev])
     nq_all_doc_non_duplicate.reset_index(inplace = True)
 
     nq_all_doc_non_duplicate['id_512'] = nq_all_doc_non_duplicate['randomid'].map(new_kmeans_nq_doc_dict_512_int_key)
