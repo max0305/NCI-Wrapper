@@ -4,6 +4,7 @@
 本框架提供統一的 baseline 執行流程：
 - SparseRetrieval: TF-IDF 斷詞→計數→TF-IDF 編碼→餘弦相似度檢索
 - NCI: 有監督 Dual-Encoder 檢索，透過 train.sh / infer.sh 完成訓練和推論
+- GR-as-MVDR
 
 整體流程： (split_raw) → do_preprocess → setup → do_train → do_eval → save_results → 彙總
 
@@ -15,7 +16,16 @@
 建立並啟用 conda 環境
 ```
   conda env create -f environment.yml
-  conda activate NCI
+  conda activate baseline
+```
+安裝 GR-as-MVDR 依賴項 SEAL
+```
+  cd schemes/GR_as_MVDR
+  conda install swig
+  git clone --recursive https://github.com/facebookresearch/SEAL.git
+  env CFLAGS='-fPIC' CXXFLAGS='-fPIC' res/external/sdsl-lite/install.sh
+  pip install -e .
+  cp beam_search.py /path/to/SEAL/seal/
 ```
 
 ## 3. 基本指令
@@ -30,6 +40,14 @@
 (3) 只跑 SparseRetrieval（無訓練）：
 ```
   python main.py --baseline sparse --do_eval
+```
+(4) 只跑 MVDR：
+```
+  python main.py --baseline mvdr  --do_preprocess --do_train --do_eval
+```
+(4) 只跑 GR：
+```
+  python main.py --baseline gr  --do_preprocess --do_train --do_eval
 ```
 ## 4. 參數說明（main.py）
 
